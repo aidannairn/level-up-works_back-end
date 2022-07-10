@@ -1,7 +1,18 @@
-const express = require('express');
-const mysql = require('mysql2');
+const express = require("express");
+const {
+    projectSubmissionRouter,
+} = require("./controllers/project-submission.js");
+const { test } = require("./controllers/project-submission");
+const { getENV } = require("./getExpressSQL");
+const cors = require("cors");
+
 const app = express();
 
+app.use(cors());
 
+app.use("/project-submission", projectSubmissionRouter);
 
-app.listen(4000);
+app.use("/test", test);
+
+const port = getENV("port");
+app.listen(port);
