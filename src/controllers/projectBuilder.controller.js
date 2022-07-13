@@ -14,27 +14,38 @@ const getProjectCount = (req, res) => {
   })
 }
 
-const getSharedBuilderCols = (req, res) => {
+const getProjectBuilderCols = (req, res) => {
   const projectID = req.params.projectID
+  const queryCols = req.query.cols
+  const queryColsArr = queryCols ? queryCols.split(' ') : []
+  let queryColsStr = ''
+  
+  if (queryColsArr.length) {
+    const colsStr = queryColsArr.join(', ')
+    queryColsStr = colsStr + ','
+  }
 
-  dbConnection.query(`SELECT Name, LearningObjective, Instructions, Video FROM ${dbName}.Project WHERE ProjectID = ${projectID}`, (error, result) => {
+  dbConnection.query(`SELECT ${queryColsStr} Name, LearningObjective, Instructions, Video FROM ${dbName}.Project WHERE ProjectID = ${projectID}`, (error, result) => {
     if (error) {
       console.log('Error', error)
       res.send('You received an error:', error.code)
     } else {
       const { Name, LearningObjective, Instructions, Video } = result[0]
 
-      const studentBuilderViews = {
-        learningObjectives: {
+      const projectBuilderViews = {}
+
+      queryColsArr.map(col => projectBuilderViews[col] = result[0][col])
+
+      projectBuilderViews.learningObjectives = {
           heading: Name,
           htmlStr: LearningObjective
-        },
-        instructions: JSON.parse(Instructions),
-        video: Video
-      }
-      res.send(studentBuilderViews)
+        }
+      projectBuilderViews.instructions = JSON.parse(Instructions),
+      projectBuilderViews.video = Video
+
+      res.send(projectBuilderViews)
     }
   })
 }
 
-module.exports = { getSharedBuilderCols, getProjectCount }
+module.exports = { getProjectBuilderCols, getProjectCount }

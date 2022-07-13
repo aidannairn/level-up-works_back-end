@@ -8,7 +8,7 @@ const app = express()
 
 app.use(cors())
 
-app.use('/student-builder', projectBuilderRouter)
+app.use('/student/project', projectBuilderRouter)
 
 const port = getENV('port')
 app.listen(port);

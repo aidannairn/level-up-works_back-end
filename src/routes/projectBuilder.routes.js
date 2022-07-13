@@ -1,10 +1,10 @@
 const express = require('express')
 
-const { getSharedBuilderCols, getProjectCount } = require('../controllers/projectBuilder.controller')
+const { getProjectBuilderCols, getProjectCount } = require('../controllers/projectBuilder.controller')
 
 const projectBuilderRouter = express.Router()
 
 projectBuilderRouter.get('/', getProjectCount)
-projectBuilderRouter.get('/project/:projectID', getSharedBuilderCols)
+projectBuilderRouter.get('/:projectID', getProjectBuilderCols)
 
 module.exports = { projectBuilderRouter }
