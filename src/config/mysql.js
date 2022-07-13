@@ -9,6 +9,6 @@ const dbConfig = {
   database: getENV('database'),
 }
 
-const dbConnection = mysql.createConnection(dbConfig)
+const dbConnection = mysql.createPool(dbConfig)
 
-module.exports = { dbConnection  }
+module.exports = { dbConnection }
