@@ -59,4 +59,38 @@ const signUpUser = (req, res) => {
   }
 }
 
-module.exports = { signUpUser }
+const loginUser = (req, res) => {
+  const { type, email, password } = req.body
+
+  if (!email) {
+    return res.status(400).send('Missing parameter: email')
+  }
+
+  if (!password) {
+    return res.status(400).send('Missing parameter: password')
+  }
+
+  dbConnection.query(`SELECT Password FROM ${dbName}.${type} WHERE Email = "${email}"`, (error, result) => {
+    if (error) {
+      console.log('Error', error)
+      res.send(`Error logging in the user. ${JSON.stringify(error?.message)}`)
+    } else {
+      if (result.length === 0) {
+        return res.status(400).send('Cannot find a user with the given email')
+      }
+      const { Password: realPassword } = result[0] // realPassword contains the one from the DB
+      // checking password from the API call with the one from the DB
+      const arePasswordsMatching = bcrypt.compareSync(password, realPassword) 
+      const responseMessage = arePasswordsMatching
+        ? `Logged in user with email: ${email}`
+        : 'Login failed. Please check your password'
+      const responseStatus = arePasswordsMatching ? 200 : 401
+      res.status(responseStatus).send(responseMessage)
+    }
+  })
+}
+
+module.exports = {
+  signUpUser,
+  loginUser
+}
