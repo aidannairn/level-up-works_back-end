@@ -1,18 +1,31 @@
 const express = require("express");
+const cors = require("cors");
+const { getENV } = require("./src/config/dotenv");
+
 const {
     projectSubmissionRouter,
-} = require("./controllers/project-submission.js");
-const { test } = require("./controllers/project-submission");
-const { getENV } = require("./getExpressSQL");
-const cors = require("cors");
+    projectSubmitted,
+} = require("./src/routes/project-submission");
+const {
+    projectLibraryTeacher,
+} = require("./src/routes/project-library-teacher");
+const { studentProjectRouter } = require("./src/routes/student-builder.js");
+const { teacherProfile } = require("./src/routes/teacher-profile");
 
 const app = express();
 
 app.use(cors());
 
-app.use("/project-submission", projectSubmissionRouter);
+app.use("/student-builder", studentProjectRouter);
 
-app.use("/test", test);
+app.get("/project-submission/", projectSubmissionRouter).put(
+    "/project-submission/:complete",
+    projectSubmitted
+);
+
+app.use("/teacher-profile", teacherProfile);
+
+app.use("/project-library", projectLibraryTeacher);
 
 const port = getENV("port");
 app.listen(port);
