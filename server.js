@@ -10,7 +10,6 @@ const {
     projectLibraryTeacher,
 } = require("./src/routes/project-library-teacher");
 const { teacherProfile } = require("./src/routes/teacher-profile");
-const { getENV } = require("./src/config/dotenv");
 const { userRouter } = require("./src/routes/user.routes");
 const {
     projectBuilderRouter,
