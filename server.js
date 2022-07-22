@@ -1,11 +1,15 @@
-const express = require("express");
-const cors = require("cors");
+const express = require('express')
+const cookieParser = require('cookie-parser') 
+const cors = require('cors')
+
 const { getENV } = require('./src/config/dotenv')
 
 const { studentProjectRouter } = require('./src/routes/student-builder.js')
 const { studentProfiles } = require('./src/routes/studentprofileviewer')
 
-
+app.use(cors({ credentials:true, origin: getENV('corsOrigin') }))
+app.use(cookieParser())
+app.use(express.json())
 
 const {
     projectSubmissionRouter,

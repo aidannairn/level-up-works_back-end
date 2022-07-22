@@ -1,4 +1,5 @@
 const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
 
 const { dbConnection } = require('../config/mysql')
 const { getENV } = require('../config/dotenv')
@@ -70,27 +71,79 @@ const loginUser = (req, res) => {
     return res.status(400).send('Missing parameter: password')
   }
 
-  dbConnection.query(`SELECT Password FROM ${dbName}.${type} WHERE Email = "${email}"`, (error, result) => {
+  dbConnection.query(`SELECT * FROM ${dbName}.${type} WHERE Email = ?`, [email], (error, result) => {
     if (error) {
       console.log('Error', error)
       res.send(`Error logging in the user. ${JSON.stringify(error?.message)}`)
     } else {
-      if (result.length === 0) {
-        return res.status(400).send('Cannot find a user with the given email')
+      if (!result.length) {
+        return res.status(401).send('Cannot find user with the given email and password.')
       }
-      const { Password: realPassword } = result[0] // realPassword contains the one from the DB
-      // checking password from the API call with the one from the DB
+      const { Password: realPassword } = result[0] 
+
       const arePasswordsMatching = bcrypt.compareSync(password, realPassword) 
-      const responseMessage = arePasswordsMatching
-        ? `Logged in user with email: ${email}`
-        : 'Login failed. Please check your password'
-      const responseStatus = arePasswordsMatching ? 200 : 401
-      res.status(responseStatus).send(responseMessage)
+
+      if (!arePasswordsMatching) {
+        return res.status(401).send('Cannot find user with the given email and password.')
+      }
+
+      const {
+        StudentID: studentID,
+        TeacherID: teacherID,
+        FirstName: fName,
+        LastName: lName,
+        ProfilePic: profilePic,
+        DateOfBirth: dob,
+        ContactNumber: contactNum,
+        Email: email,
+        School: school,
+        Course: course
+      } = result[0]
+
+      const accessToken = jwt.sign({ studentID, teacherID, fName, lName, profilePic, dob, contactNum, email, school, course }, getENV('accessToken'), {
+        expiresIn: '15s'
+      })
+
+      const refreshToken = jwt.sign({ studentID, teacherID, fName, lName, profilePic, dob, contactNum, email, school, course }, getENV('refreshToken'), {
+        expiresIn: '1d'
+      })
+
+      dbConnection.query(`UPDATE ${dbName}.Student SET RefreshToken = "${refreshToken}" WHERE StudentID = ${studentID}`)
+
+      res.cookie('refreshToken', refreshToken, {
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000
+      })
+
+      res.status(200).json({ accessToken })
+    }
+  })
+}
+
+const logoutUser = (req, res) => {
+  const refreshToken = req.cookies.refreshToken
+
+  if(!refreshToken) return res.sendStatus(204)
+
+  dbConnection.query(`SELECT StudentID FROM ${dbName}.Student WHERE RefreshToken = ?`, [refreshToken], (error, result) => {
+    if (error) {
+      console.log('Error:', error)
+      res.send(`Error logging out the user. ${JSON.stringify(error?.message)}`)
+    } else {
+      if (!result[0]) return res.sendStatus(204)
+    
+      const studentID = result[0].StudentID
+    
+      dbConnection.query(`UPDATE Student SET RefreshToken = null WHERE StudentID = ${studentID}`)
+    
+      res.clearCookie('refreshToken')
+      return res.sendStatus(200)
     }
   })
 }
 
 module.exports = {
   signUpUser,
-  loginUser
+  loginUser,
+  logoutUser
 }
