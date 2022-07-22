@@ -120,7 +120,30 @@ const loginUser = (req, res) => {
   })
 }
 
+const logoutUser = (req, res) => {
+  const refreshToken = req.cookies.refreshToken
+
+  if(!refreshToken) return res.sendStatus(204)
+
+  dbConnection.query(`SELECT StudentID FROM ${dbName}.Student WHERE RefreshToken = ?`, [refreshToken], (error, result) => {
+    if (error) {
+      console.log('Error:', error)
+      res.send(`Error logging out the user. ${JSON.stringify(error?.message)}`)
+    } else {
+      if (!result[0]) return res.sendStatus(204)
+    
+      const studentID = result[0].StudentID
+    
+      dbConnection.query(`UPDATE Student SET RefreshToken = null WHERE StudentID = ${studentID}`)
+    
+      res.clearCookie('refreshToken')
+      return res.sendStatus(200)
+    }
+  })
+}
+
 module.exports = {
   signUpUser,
-  loginUser
+  loginUser,
+  logoutUser
 }

@@ -9,6 +9,6 @@ const userRouter = express.Router()
 userRouter.post('/signup', verifyToken, signUpUser)
 userRouter.post('/login', loginUser)
 userRouter.get('/token', refreshToken)
-// userRouter.delete('/logout', logoutUser)
+userRouter.delete('/logout', logoutUser)
 
 module.exports = { userRouter }
