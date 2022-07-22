@@ -6,7 +6,6 @@ const { studentProjectRouter } = require('./src/routes/student-builder.js')
 const { studentProfiles } = require('./src/routes/studentprofileviewer')
 
 
-
 const {
     projectSubmissionRouter,
     projectSubmitted,
