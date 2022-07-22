@@ -1,23 +1,43 @@
-const express = require('express')
-const cors = require('cors')
-
+const express = require("express");
+const cors = require("cors");
 const { getENV } = require('./src/config/dotenv')
+
 const { studentProjectRouter } = require('./src/routes/student-builder.js')
 const { studentProfiles } = require('./src/routes/studentprofileviewer')
 
 
 
+const {
+    projectSubmissionRouter,
+    projectSubmitted,
+} = require("./src/routes/project-submission");
+const {
+    projectLibraryTeacher,
+} = require("./src/routes/project-library-teacher");
+const { teacherProfile } = require("./src/routes/teacher-profile");
+const { userRouter } = require("./src/routes/user.routes");
+const {
+    projectBuilderRouter,
+} = require("./src/routes/projectBuilder.routes.js");
+
 const app = express();
 
-app.use(cors())
-
-app.use('/student-builder', studentProjectRouter)
-app.use('/student-profiles', studentProfiles)
+app.use(express.json());
+app.use(cors());
 
 
+app.use(userRouter);
+app.use("/student/project", projectBuilderRouter);
 
-const port = getENV('port')
+app.get("/project-submission/", projectSubmissionRouter).put(
+    "/project-submission/:complete",
+    projectSubmitted
+);
 
-app.listen(port, () => {
-    console.log('running on port 4000')
-});
+app.use("/teacher-profile", teacherProfile);
+
+app.use("/project-library", projectLibraryTeacher);
+
+const port = getENV("port");
+app.listen(port);
+
