@@ -31,7 +31,7 @@ app.use(express.json())
 app.use(userRouter);
 app.use("/student/project", projectBuilderRouter);
 
-app.use('/profile-picture-list', studentProfiles)
+app.use('/student-profiles', studentProfiles)
 
 app.get("/project-submission/", projectSubmissionRouter).put(
     "/project-submission/:complete",
