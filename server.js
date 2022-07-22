@@ -1,6 +1,11 @@
 const express = require("express");
 const cors = require("cors");
-const { getENV } = require("./src/config/dotenv");
+const { getENV } = require('./src/config/dotenv')
+
+const { studentProjectRouter } = require('./src/routes/student-builder.js')
+const { studentProfiles } = require('./src/routes/studentprofileviewer')
+
+
 
 const {
     projectSubmissionRouter,
@@ -20,6 +25,7 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
+
 app.use(userRouter);
 app.use("/student/project", projectBuilderRouter);
 
@@ -34,3 +40,4 @@ app.use("/project-library", projectLibraryTeacher);
 
 const port = getENV("port");
 app.listen(port);
+
