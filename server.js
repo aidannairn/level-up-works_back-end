@@ -5,8 +5,6 @@ const { studentProfiles } = require('./src/routes/studentprofileviewer')
 
 const { getENV } = require('./src/config/dotenv')
 
-const { studentProfiles } = require('./src/routes/studentprofileviewer')
-
 const {
     projectSubmissionRouter,
     projectSubmitted,
