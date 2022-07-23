@@ -1,6 +1,7 @@
 const express = require('express')
 const cookieParser = require('cookie-parser') 
 const cors = require('cors')
+const { studentProfiles } = require('./src/routes/studentprofileviewer')
 
 const { getENV } = require('./src/config/dotenv')
 
@@ -27,6 +28,8 @@ app.use(express.json())
 
 app.use(userRouter);
 app.use("/student/project", projectBuilderRouter);
+
+app.use('/student-profiles', studentProfiles)
 
 app.get("/project-submission/", projectSubmissionRouter).put(
     "/project-submission/:complete",
