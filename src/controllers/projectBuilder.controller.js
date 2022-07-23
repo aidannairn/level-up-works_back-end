@@ -25,12 +25,12 @@ const getProjectBuilderCols = (req, res) => {
     queryColsStr = colsStr + ','
   }
 
-  dbConnection.query(`SELECT ${queryColsStr} Name, LearningObjective, Instructions, Video FROM ${dbName}.Project WHERE ProjectID = ${projectID}`, (error, result) => {
+  dbConnection.query(`SELECT ${queryColsStr} ProjectID, Name, LearningObjective, Instructions, Video FROM ${dbName}.Project WHERE ProjectID = ${projectID}`, (error, result) => {
     if (error) {
       console.log('Error', error)
       res.send('You received an error:', error.code)
     } else {
-      const { Name, LearningObjective, Instructions, Video } = result[0]
+      const { ProjectID, Name, LearningObjective, Instructions, Video } = result[0]
 
       const projectBuilderViews = {}
 
@@ -42,10 +42,44 @@ const getProjectBuilderCols = (req, res) => {
         }
       projectBuilderViews.instructions = JSON.parse(Instructions),
       projectBuilderViews.video = Video
+      projectBuilderViews.id = ProjectID
 
       res.send(projectBuilderViews)
     }
   })
 }
 
-module.exports = { getProjectBuilderCols, getProjectCount }
+const submitProject = (req, res) => {
+  try {
+    const { projectID, studentID } = req.params
+    const imageURL = req.body.imageURL
+
+    const resJSON = {}
+  
+    let query = `
+      UPDATE  Progress_History 
+      SET     DateSubmitted = CURRENT_DATE(),
+              Submission = "${imageURL}"
+      WHERE   ProjectID = (${projectID}) 
+      AND     StudentID = ${studentID}
+    `
+  
+    dbConnection.query(query, (error, result) => {
+      if (error) {
+        console.log('Error', error)
+        resJSON.type = 'error',
+        resJSON.msg = `You received an error: ${error.code}`
+        res.json(resJSON)
+      } else {
+        resJSON.type = 'success',
+        resJSON.msg = `Your project has been submitted. Your teacher will be in touch.`
+        res.status(200).json(resJSON)
+      }
+    })
+
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+module.exports = { getProjectBuilderCols, getProjectCount, submitProject }

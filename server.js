@@ -4,12 +4,7 @@ const cors = require('cors')
 
 const { getENV } = require('./src/config/dotenv')
 
-const { studentProjectRouter } = require('./src/routes/student-builder.js')
 const { studentProfiles } = require('./src/routes/studentprofileviewer')
-
-app.use(cors({ credentials:true, origin: getENV('corsOrigin') }))
-app.use(cookieParser())
-app.use(express.json())
 
 const {
     projectSubmissionRouter,
@@ -26,9 +21,9 @@ const {
 
 const app = express();
 
-app.use(express.json());
-app.use(cors());
-
+app.use(cors({ credentials:true, origin: getENV('corsOrigin') }))
+app.use(cookieParser())
+app.use(express.json())
 
 app.use(userRouter);
 app.use("/student/project", projectBuilderRouter);
