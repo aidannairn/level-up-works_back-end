@@ -6,7 +6,7 @@ const { signUpUser, loginUser, logoutUser } = require('../controllers/user.contr
 
 const userRouter = express.Router()
 
-userRouter.post('/signup', verifyToken, signUpUser)
+userRouter.post('/signup', signUpUser)
 userRouter.post('/login', loginUser)
 userRouter.get('/token', refreshToken)
 userRouter.delete('/logout', logoutUser)
