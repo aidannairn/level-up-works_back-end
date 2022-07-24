@@ -10,66 +10,60 @@ const dbName = getENV('database')
 
 studentProfiles.get('/profile-picture-list', (req, res) => {
     dbConnection.query(`
-    SELECT  Student.FirstName, Student.LastName, Student.ProfilePic, Student.StudentID,
-            Progress_History.StudentID, Progress_History.ProjectID, Progress_History.DateCompleted, Progress_History.ProjectsCompleted
+SELECT  Student.firstName, Student.lastName, Student.profilePic, 
+    Student.studentID, Progress_History.projectID, Progress_History.dateCompleted
 
-    FROM      Student
+FROM    Progress_History
 
-    LEFT JOIN Progress_History
+INNER JOIN Student
 
-    ON Student.StudentID = Progress_History.StudentID;`,
+ON Progress_History.StudentID = Student.StudentID;`,
     
      (error, result) => {
          if (error) {
             console.log('Error', error)
             res.send("you have an error:", error.code)
         } else {
-/*
-            const array = [];
-            const obj = {}
-            result.map((res, index) => {
-                if (Object.keys(obj).length > 0) {
-                    //console.log()
-                    obj.ProjectID.push(res.ProjectID)
-                } else {
-                    obj.ProjectID = []
-                    obj.StudentID = res.StudentID
-                    obj.FirstName = res.FirstName
-                    obj.LastName = res.LastName
-                    obj.ProjectID.push(res.ProjectID)
-                    //console.log('hello', obj)
-                    array.push(obj)
-                    obj.StudentID = ''
-                }
-            })
-            console.log(array)
- */
-            res.send(result)
-        }
-    })
+
+         // console.log(result)
+         const studentArr = [];
+         result.map(histItem => {
+             const {
+                 firstName,
+                 lastName,
+                 profilePic,
+                 studentID,
+                 projectID,
+                 dateCompleted
+             } = histItem
+
+             // console.log(histItem)
+
+             const project = { projectID, dateCompleted }
+
+             const currentStudentIndex = studentArr.findIndex(student => student.studentID === studentID)
+
+             if (currentStudentIndex >= 0) {
+                 studentArr[currentStudentIndex].projects.push(project)
+             } else {
+                 const student = {
+                     firstName,
+                     lastName,
+                     profilePic,
+                     studentID,
+                     projects: [
+                         project
+                     ]
+                 }
+                 // console.log(student)
+                 studentArr.push(student)
+             }
+         })
+         console.log(studentArr)
+         res.send(studentArr)
+     }
+ })
 })
 
-/*
-studentProfiles.get('/student-progress', (req, res) => {
-    dbConnection.query(`
-    SELECT    Student.StudentID, Student.FirstName, Student.LastName
-              Progress_History.StudentID, Progress_History.ProjectID, Progress_History.DateCompleted
-
-    FROM      Student
-
-    LEFT JOIN Progress_History
-
-    ON Student.StudentID = Progress_History.StudentID;`,
-    
-     (error, result) => {
-         if (error) {
-            console.log('Error', error)
-            res.send("you have an error:", error.code)
-        } else {
-            res.send(result)
-        }
-    })
-})
-*/
 
 module.exports = { studentProfiles }
