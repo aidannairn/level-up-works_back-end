@@ -1,9 +1,9 @@
-const express = require('express')
-const cookieParser = require('cookie-parser') 
-const cors = require('cors')
-const { studentProfiles } = require('./src/routes/studentprofileviewer')
+const express = require("express");
+const cookieParser = require("cookie-parser");
+const cors = require("cors");
+const { studentProfiles } = require("./src/routes/studentprofileviewer");
 
-const { getENV } = require('./src/config/dotenv')
+const { getENV } = require("./src/config/dotenv");
 
 const {
     projectSubmissionRouter,
@@ -20,17 +20,17 @@ const {
 
 const app = express();
 
-app.use(cors({ credentials:true, origin: getENV('corsOrigin') }))
-app.use(cookieParser())
-app.use(express.json())
+app.use(cors({ credentials: true, origin: getENV("corsOrigin") }));
+app.use(cookieParser());
+app.use(express.json());
 
 app.use(userRouter);
 app.use("/student/project", projectBuilderRouter);
 
-app.use('/student-profiles', studentProfiles)
+app.use("/student-profiles", studentProfiles);
 
 app.get("/project-submission/", projectSubmissionRouter).put(
-    "/project-submission/:complete",
+    "/project-submission/complete",
     projectSubmitted
 );
 
@@ -40,4 +40,3 @@ app.use("/project-library", projectLibraryTeacher);
 
 const port = getENV("port");
 app.listen(port);
-
