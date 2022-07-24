@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
+const jwtDecode = require('jwt-decode')
 
 const { dbConnection } = require('../config/mysql')
 const { getENV } = require('../config/dotenv')
@@ -100,15 +101,18 @@ const loginUser = (req, res) => {
         Course: course
       } = result[0]
 
-      const accessToken = jwt.sign({ studentID, teacherID, fName, lName, profilePic, dob, contactNum, email, school, course }, getENV('accessToken'), {
+      let userID = studentID
+      if (type === 'Teacher') userID = teacherID
+
+      const accessToken = jwt.sign({ type, studentID, teacherID, fName, lName, profilePic, dob, contactNum, email, school, course }, getENV('accessToken'), {
         expiresIn: '15s'
       })
 
-      const refreshToken = jwt.sign({ studentID, teacherID, fName, lName, profilePic, dob, contactNum, email, school, course }, getENV('refreshToken'), {
+      const refreshToken = jwt.sign({ type, studentID, teacherID, fName, lName, profilePic, dob, contactNum, email, school, course }, getENV('refreshToken'), {
         expiresIn: '1d'
       })
 
-      dbConnection.query(`UPDATE ${dbName}.Student SET RefreshToken = "${refreshToken}" WHERE StudentID = ${studentID}`)
+      dbConnection.query(`UPDATE ${dbName}.${type} SET RefreshToken = "${refreshToken}" WHERE ${type}ID = "${userID}"`)
 
       res.cookie('refreshToken', refreshToken, {
         httpOnly: true,
@@ -125,16 +129,18 @@ const logoutUser = (req, res) => {
 
   if(!refreshToken) return res.sendStatus(204)
 
-  dbConnection.query(`SELECT StudentID FROM ${dbName}.Student WHERE RefreshToken = ?`, [refreshToken], (error, result) => {
+  const { type } = jwtDecode(refreshToken)
+
+  dbConnection.query(`SELECT ${type}ID FROM ${dbName}.${type} WHERE RefreshToken = ?`, [refreshToken], (error, result) => {
     if (error) {
       console.log('Error:', error)
       res.send(`Error logging out the user. ${JSON.stringify(error?.message)}`)
     } else {
       if (!result[0]) return res.sendStatus(204)
     
-      const studentID = result[0].StudentID
+      const userID = result[0][type + 'ID']
     
-      dbConnection.query(`UPDATE Student SET RefreshToken = null WHERE StudentID = ${studentID}`)
+      dbConnection.query(`UPDATE ${type} SET RefreshToken = null WHERE ${type}ID = "${userID}"`)
     
       res.clearCookie('refreshToken')
       return res.sendStatus(200)
