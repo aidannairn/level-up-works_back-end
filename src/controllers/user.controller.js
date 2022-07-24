@@ -8,6 +8,30 @@ const { getENV } = require('../config/dotenv')
 const dbName = getENV('database')
 
 const signUpUser = (req, res) => {
+  const { type, firstName, lastName, email, password } = req.body
+
+  if (!firstName) return res.status(400).json({ type: 'error', msg: 'Missing parameter: First Name' })
+  if (!lastName) return res.status(400).json({ type: 'error', msg: 'Missing parameter: Last Name' })
+  if (!email) return res.status(400).json({ type: 'error', msg: 'Missing parameter: Email' })
+  if (!password) return res.status(400).json({ type: 'error', msg: 'Missing parameter: Password' })
+  
+  try {
+    const hashedPassword = bcrypt.hashSync(password, 10)
+
+    const query = `
+      INSERT INTO ${dbName}.${type} 
+      (FirstName, LastName, Email, Password)
+      VALUES (?, ?, ?, ?)
+    `
+    
+    dbConnection.query(query, [firstName, lastName, email, hashedPassword] )
+    res.json({type: 'success', msg: `Created a new User with the email: ${email}.`})
+  } catch (error) {
+    res.status(400).json({type: 'error', msg: `Error creating the user. ${JSON.stringify(error?.message)}`})
+  }
+}
+
+const signUpCompleteUser = (req, res) => {
   const { type, teacherID, firstName, lastName, email, password, school, profilePic, dateOfBirth, contactNumber, course } = req.body
 
   if (!email) {
