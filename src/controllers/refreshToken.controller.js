@@ -1,6 +1,9 @@
 const jwt = require('jsonwebtoken')
+const jwtDecode = require('jwt-decode')
+
 const { getENV } = require('../config/dotenv')
 const { dbConnection } = require('../config/mysql')
+const { fillUserQuery } = require('../utils/fillUserQuery')
 
 const refreshToken = (req, res) => {
   try {
@@ -8,29 +11,37 @@ const refreshToken = (req, res) => {
 
     if (!refreshToken) return res.sendStatus(401)
 
-    dbConnection.query(`SELECT studentID, teacherID, FirstName, LastName, email, school, profilePic, DateOfBirth, ContactNumber, course FROM ${getENV('database')}.Student WHERE RefreshToken = "${refreshToken}"`, (error, result) => {
+    const { type } = jwtDecode(refreshToken)
+
+    dbConnection.query(`SELECT ${fillUserQuery(type)} FROM ${getENV('database')}.${type} WHERE RefreshToken = "${refreshToken}"`, (error, result) => {
       if (error) {
         console.log('Error:', error)
       } else {
-        if (!result[0]) return res.sendStatus(403)
+        if (!result[0]) {
+          console.log(error)
+          return res.sendStatus(403)
+        }
 
         jwt.verify(refreshToken, getENV('refreshToken'), (err, decoded) => {
-          if (err) return res.sendStatus(403)
+          if (err) {
+            console.log(err)
+            return res.sendStatus(403)
+          }
 
           const {
             studentID,
             teacherID,
-            FirstName: fName,
-            LastName: lName,
+            firstName,
+            lastName,
             profilePic,
-            DateOfBirth: dob,
-            ContactNumber: contactNum,
+            dateOfBirth,
+            contactNum,
             email,
             school,
             course
           } = result[0]
 
-          const accessToken = jwt.sign({ studentID, teacherID, fName, lName, profilePic, dob, contactNum, email, school, course }, getENV('accessToken'), {
+          const accessToken = jwt.sign({ type, studentID, teacherID, firstName, lastName, profilePic, dateOfBirth, contactNum, email, school, course }, getENV('accessToken'), {
             expiresIn: '15s'
           })
           res.json({ accessToken })

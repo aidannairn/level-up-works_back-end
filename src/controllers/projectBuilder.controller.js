@@ -16,16 +16,8 @@ const getProjectCount = (req, res) => {
 
 const getProjectBuilderCols = (req, res) => {
   const projectID = req.params.projectID
-  const queryCols = req.query.cols
-  const queryColsArr = queryCols ? queryCols.split(' ') : []
-  let queryColsStr = ''
-  
-  if (queryColsArr.length) {
-    const colsStr = queryColsArr.join(', ')
-    queryColsStr = colsStr + ','
-  }
 
-  dbConnection.query(`SELECT ${queryColsStr} ProjectID, Name, LearningObjective, Instructions, Video FROM ${dbName}.Project WHERE ProjectID = ${projectID}`, (error, result) => {
+  dbConnection.query(`SELECT ProjectID, Name, LearningObjective, Instructions, Video FROM ${dbName}.Project WHERE ProjectID = ${projectID}`, (error, result) => {
     if (error) {
       console.log('Error', error)
       res.send('You received an error:', error.code)
@@ -33,8 +25,6 @@ const getProjectBuilderCols = (req, res) => {
       const { ProjectID, Name, LearningObjective, Instructions, Video } = result[0]
 
       const projectBuilderViews = {}
-
-      queryColsArr.map(col => projectBuilderViews[col] = result[0][col])
 
       projectBuilderViews.learningObjectives = {
           heading: Name,
