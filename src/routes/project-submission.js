@@ -15,7 +15,7 @@ FROM
 WHERE
     Student.StudentID = Progress_History.StudentID
         AND DateCompleted = '0000-00-00'
-        AND Submission IS NOT NULL
+        AND Submission != "" or null
         AND DateSubmitted != '0000-00-00'
 ORDER BY DateSubmitted ASC`;
 
@@ -27,14 +27,14 @@ ORDER BY DateSubmitted ASC`;
 };
 
 const projectSubmitted = (req, res) => {
-    const users = req.params.complete;
-    console.log(`before connection`, req.params.complete);
+    const projectKey = req.body.projectKey;
+    const studentKey = req.body.studentKey;
     let sql = `UPDATE Progress_History set DateCompleted = CURRENT_DATE()
-    where StudentID in (${users}) AND DateCompleted = '0000-00-00'`;
+    where StudentID in (${studentKey}) AND ProjectID in (${projectKey})`;
 
     dbConnection.query(sql, (err, result) => {
         if (err) throw err;
-        ("hello");
+        ("error during update request");
     });
 };
 
