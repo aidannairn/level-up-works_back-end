@@ -8,7 +8,8 @@ const projectSubmissionRouter = (req, res) => {
     profilePic,
     dateSubmitted,
     dateCompleted,
-    submission
+    submission,
+    completedid
 FROM
     Student,
     Progress_History
@@ -30,7 +31,7 @@ const projectSubmitted = (req, res) => {
     const projectKey = req.body.projectKey;
     const studentKey = req.body.studentKey;
     let sql = `UPDATE Progress_History set DateCompleted = CURRENT_DATE()
-    where StudentID in (${studentKey}) AND ProjectID in (${projectKey})`;
+    where CompletedID in (${studentKey}) AND ProjectID in (${projectKey})`;
 
     dbConnection.query(sql, (err, result) => {
         if (err) throw err;
