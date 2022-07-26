@@ -25,7 +25,7 @@ ON Progress_History.StudentID = Student.StudentID;`,
             res.send("you have an error:", error.code)
         } else {
 
-         // console.log(result)
+            //mapping through progress history and creating project item from DB columns
          const studentArr = [];
          result.map(histItem => {
              const {
@@ -37,12 +37,12 @@ ON Progress_History.StudentID = Student.StudentID;`,
                  dateCompleted
              } = histItem
 
-             // console.log(histItem)
-
              const project = { projectID, dateCompleted }
 
+             //checking to see if the student has already been added, if yes store in array
              const currentStudentIndex = studentArr.findIndex(student => student.studentID === studentID)
 
+             //add project to current students project property, if not exist, create the student.
              if (currentStudentIndex >= 0) {
                  studentArr[currentStudentIndex].projects.push(project)
              } else {
@@ -55,7 +55,8 @@ ON Progress_History.StudentID = Student.StudentID;`,
                          project
                      ]
                  }
-                 // console.log(student)
+
+                 //push new student to array
                  studentArr.push(student)
              }
          })
