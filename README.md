@@ -11,3 +11,4 @@ The LMS is intended to assist **two** main user groups, both of whom are able to
 - **School Teachers** - Are able to track student progress and help students where necessary.
 
 ---
+[View the Site Map](site-map.pdf)
